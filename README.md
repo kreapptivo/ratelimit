@@ -123,7 +123,8 @@ $ go test
 ## Credits
 
 - [Ahmed Ashraf](https://github.com/ahmedash95)
+- [Kreapptivo](https://github.com/kreapptivo)
 
 ## License
 
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+The MIT License (MIT). Please see [License File](LICENSE) for more information.
