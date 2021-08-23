@@ -10,34 +10,34 @@ import (
 func Test_simple_pattern_SECOND(t *testing.T) {
 	l, _ := parse("1r/s")
 	assert.Equal(t, time.Second, l.Per)
-	assert.Equal(t, 1, l.Max)
+	assert.Equal(t, uint32(1), l.Max)
 }
 
 func Test_simple_pattern_MINUTE(t *testing.T) {
 	l, _ := parse("1r/m")
 	assert.Equal(t, time.Minute, l.Per)
-	assert.Equal(t, 1, l.Max)
+	assert.Equal(t, uint32(1), l.Max)
 }
 
 func Test_simple_pattern_HOUR(t *testing.T) {
 	l, _ := parse("1r/h")
 	assert.Equal(t, time.Hour, l.Per)
-	assert.Equal(t, 1, l.Max)
+	assert.Equal(t, uint32(1), l.Max)
 }
 
 func Test_simple_pattern_DAY(t *testing.T) {
 	l, _ := parse("1r/d")
 	assert.Equal(t, time.Hour*24, l.Per)
-	assert.Equal(t, 1, l.Max)
+	assert.Equal(t, uint32(1), l.Max)
 }
 
 func Test_pattern_with_spammer_and_blocker(t *testing.T) {
 	l, _ := parse("1r/s,spam:2,block:15d")
-	assert.Equal(t, 2, l.MaxToSpam)
+	assert.Equal(t, uint32(2), l.MaxToSpam)
 	assert.Equal(t, 15*(time.Hour*24), l.Block)
 
 	l2, _ := parse("1r/m,spam:5,block:12d")
-	assert.Equal(t, 5, l2.MaxToSpam)
+	assert.Equal(t, uint32(5), l2.MaxToSpam)
 	assert.Equal(t, 12*(time.Hour*24), l2.Block)
 }
 

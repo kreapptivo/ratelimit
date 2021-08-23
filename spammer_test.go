@@ -20,7 +20,7 @@ func Test_it_count_spam_as_expected(t *testing.T) {
 	time.Sleep(1*time.Second + (time.Millisecond * 100))
 	l1.Hit(key)
 	l1.Hit(key)
-	assert.Equal(t, 3, l1.Spammer.Values[key].Hits)
+	assert.Equal(t, uint32(3), l1.Spammer.Values[key].Hits)
 	actual := l1.Spammer.Values[key].ExpiredAt.Format("2006-01-02 15:04:05")
 	assert.Equal(t, expected, actual)
 }

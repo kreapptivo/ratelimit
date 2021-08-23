@@ -9,18 +9,17 @@ import (
 )
 
 type Limit struct {
-	MaxRequests int
+	MaxRequests uint32
 	Per         time.Duration
 	Block       time.Duration
 	Blocker     Blocker
-	MaxSpam     int
+	MaxSpam     uint32
 	Spammer     Spammer
 	Rates       map[string]*RateLimit
 }
 
 type RateLimit struct {
-	ExpiredAt time.Time
-	Hits      int
+	Hits uint32
 }
 
 var Mutex sync.Mutex
@@ -56,7 +55,7 @@ func CreateLimit(key string) Limit {
 
 func createKey() *RateLimit {
 	return &RateLimit{
-		ExpiredAt: time.Now(),
+		Hits: 0,
 	}
 }
 

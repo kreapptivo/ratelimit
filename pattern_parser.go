@@ -8,10 +8,10 @@ import (
 )
 
 type Options struct {
-	Max       int
+	Max       uint32
 	Per       time.Duration
 	Block     time.Duration
-	MaxToSpam int
+	MaxToSpam uint32
 }
 
 func parse(s string) (Options, error) {
@@ -41,7 +41,7 @@ func parse(s string) (Options, error) {
 		return op, fmt.Errorf("Invalid limit [%s] Limit must be per s as second, m as minute, h as hour or d as day", per)
 	}
 
-	op.Max = maxValue
+	op.Max = uint32(maxValue)
 	op.Per = perDuration
 
 	for _, p := range parsed[1:] {
@@ -54,7 +54,10 @@ func parse(s string) (Options, error) {
 		}
 		if s[0] == "spam" {
 			value, _ := strconv.Atoi(s[1])
-			op.MaxToSpam = value
+			if value < 1 {
+				return op, fmt.Errorf("Invalid spam value [%d] must be larger than zero", value)
+			}
+			op.MaxToSpam = uint32(value)
 		}
 		if s[0] == "block" {
 			v := s[1]

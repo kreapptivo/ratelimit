@@ -33,34 +33,34 @@ func Test_HIT_New_Rate_Limits(t *testing.T) {
 	l1 := CreateLimit("1r/s")
 	k1 := "127.0.0.1"
 	l1.Hit(k1)
-	assert.Equal(t, 1, l1.Rates[k1].Hits)
+	assert.Equal(t, uint32(1), l1.Rates[k1].Hits)
 }
 
 func Test_Rate_Limits_SECONDS_OPTION(t *testing.T) {
 	l1 := CreateLimit("1r/s,spam:3,block:2d")
 	assert.Equal(t, time.Second, l1.Per)
-	assert.Equal(t, 1, l1.MaxRequests)
+	assert.Equal(t, uint32(1), l1.MaxRequests)
 	assert.Equal(t, 2*time.Hour*24, l1.Block)
 }
 
 func Test_Rate_Limits_MINUTE_OPTION(t *testing.T) {
 	l1 := CreateLimit("1r/m,spam:3,block:2d")
 	assert.Equal(t, time.Minute, l1.Per)
-	assert.Equal(t, 1, l1.MaxRequests)
+	assert.Equal(t, uint32(1), l1.MaxRequests)
 	assert.Equal(t, 2*time.Hour*24, l1.Block)
 }
 
 func Test_Rate_Limits_HOUR_OPTION(t *testing.T) {
 	l1 := CreateLimit("1r/h,spam:3,block:2d")
 	assert.Equal(t, time.Hour, l1.Per)
-	assert.Equal(t, 1, l1.MaxRequests)
+	assert.Equal(t, uint32(1), l1.MaxRequests)
 	assert.Equal(t, 2*time.Hour*24, l1.Block)
 }
 
 func Test_Rate_Limits_DAY_OPTION(t *testing.T) {
 	l1 := CreateLimit("1r/d,spam:3,block:2d")
 	assert.Equal(t, time.Hour*24, l1.Per)
-	assert.Equal(t, 1, l1.MaxRequests)
+	assert.Equal(t, uint32(1), l1.MaxRequests)
 	assert.Equal(t, 2*time.Hour*24, l1.Block)
 }
 
@@ -99,7 +99,7 @@ func Test_The_Limit_EVERY_SECOND(t *testing.T) {
 	err = l.Hit(k)
 	assert.FailOnError(t, err, "Hit should be accepted")
 
-	assert.Equal(t, 1, l.Rates[k].Hits)
+	assert.Equal(t, uint32(1), l.Rates[k].Hits)
 }
 
 func Test_It_Clear_The_Limit_EVERY_MINUTE(t *testing.T) {
@@ -112,7 +112,7 @@ func Test_It_Clear_The_Limit_EVERY_MINUTE(t *testing.T) {
 	err = l.Hit(k)
 	assert.FailOnError(t, err, "Hit should be accepted")
 
-	assert.Equal(t, 3, l.Rates[k].Hits)
+	assert.Equal(t, uint32(3), l.Rates[k].Hits)
 
 	// Manipulate time to not having to wait so long...
 	travelToFuture := time.Now().Add(time.Minute)
@@ -122,7 +122,7 @@ func Test_It_Clear_The_Limit_EVERY_MINUTE(t *testing.T) {
 	time.Sleep(2 * time.Second)
 	err = l.Hit(k)
 	assert.FailOnError(t, err, "Hit should be accepted")
-	assert.Equal(t, 1, l.Rates[k].Hits)
+	assert.Equal(t, uint32(1), l.Rates[k].Hits)
 }
 
 func Test_It_Clear_The_Limit_EVERY_HOUR(t *testing.T) {
@@ -135,7 +135,7 @@ func Test_It_Clear_The_Limit_EVERY_HOUR(t *testing.T) {
 	assert.FailOnError(t, err, "Hit should be accepted")
 	err = l.Hit(k)
 	assert.FailOnError(t, err, "Hit should be accepted")
-	assert.Equal(t, 3, l.Rates[k].Hits)
+	assert.Equal(t, uint32(3), l.Rates[k].Hits)
 
 	// Manipulate time to not having to wait so long...
 	travelToFuture := time.Now().Add(time.Hour)
@@ -145,7 +145,7 @@ func Test_It_Clear_The_Limit_EVERY_HOUR(t *testing.T) {
 	time.Sleep(2 * time.Second)
 	err = l.Hit(k)
 	assert.FailOnError(t, err, "Hit should be accepted")
-	assert.Equal(t, 1, l.Rates[k].Hits)
+	assert.Equal(t, uint32(1), l.Rates[k].Hits)
 }
 
 func Test_It_Clear_The_Limit_EVERY_DAY(t *testing.T) {
@@ -157,9 +157,7 @@ func Test_It_Clear_The_Limit_EVERY_DAY(t *testing.T) {
 	assert.FailOnError(t, err, "Hit should be accepted")
 	err = l.Hit(k)
 	assert.FailOnError(t, err, "Hit should be accepted")
-	assert.Equal(t, 3, l.Rates[k].Hits)
-
-	assert.Equal(t, 3, l.Rates[k].Hits)
+	assert.Equal(t, uint32(3), l.Rates[k].Hits)
 
 	// Manipulate time to not having to wait so long...
 	travelToFuture := time.Now().Add(time.Hour * 24)
@@ -169,5 +167,5 @@ func Test_It_Clear_The_Limit_EVERY_DAY(t *testing.T) {
 	time.Sleep(2 * time.Second)
 	err = l.Hit(k)
 	assert.FailOnError(t, err, "Hit should be accepted")
-	assert.Equal(t, 1, l.Rates[k].Hits)
+	assert.Equal(t, uint32(1), l.Rates[k].Hits)
 }

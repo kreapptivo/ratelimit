@@ -1,10 +1,12 @@
 package ratelimit
 
-import "time"
+import (
+	"time"
+)
 
 type Spam struct {
 	ExpiredAt time.Time
-	Hits      int
+	Hits      uint32
 }
 
 type Spammer struct {
