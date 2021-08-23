@@ -11,7 +11,7 @@ var s *gocron.Scheduler = gocron.NewScheduler(time.UTC)
 
 func RunLimitCleaner(l *Limit) error {
 	_, err := s.Every(l.Per).Do(func() {
-		for k, r := range l.Rates {
+		for _, r := range l.Rates {
 			Mutex.Lock()
 			hits := r.Hits
 			// Leaky Bucket drop rate
@@ -25,7 +25,6 @@ func RunLimitCleaner(l *Limit) error {
 	})
 	if err != nil {
 		panic(fmt.Sprintf("Error adding cleaning job: %s", err))
-		return err
 	}
 	s.StartAsync()
 	return nil
