@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"aahframework.org/test.v0/assert"
-	"github.com/bouk/monkey"
+	"bou.ke/monkey"
 )
 
 func Test_IT_PANIC_WHEN_INVALID_NEW_RATE_PATTERN(t *testing.T) {
@@ -26,7 +26,7 @@ func Test_IT_PANIC_WHEN_INVALID_TIME_PATTERN(t *testing.T) {
 		}
 	}()
 
-	_ = CreateLimit("1r/d")
+	_ = CreateLimit("1r/q")
 }
 
 func Test_HIT_New_Rate_Limits(t *testing.T) {
@@ -36,9 +36,30 @@ func Test_HIT_New_Rate_Limits(t *testing.T) {
 	assert.Equal(t, 1, l1.Rates[k1].Hits)
 }
 
-func Test_Rate_Limits_WITH_OPTIONS(t *testing.T) {
+func Test_Rate_Limits_SECONDS_OPTION(t *testing.T) {
 	l1 := CreateLimit("1r/s,spam:3,block:2d")
 	assert.Equal(t, time.Second, l1.Per)
+	assert.Equal(t, 1, l1.MaxRequests)
+	assert.Equal(t, 2*time.Hour*24, l1.Block)
+}
+
+func Test_Rate_Limits_MINUTE_OPTION(t *testing.T) {
+	l1 := CreateLimit("1r/m,spam:3,block:2d")
+	assert.Equal(t, time.Minute, l1.Per)
+	assert.Equal(t, 1, l1.MaxRequests)
+	assert.Equal(t, 2*time.Hour*24, l1.Block)
+}
+
+func Test_Rate_Limits_HOUR_OPTION(t *testing.T) {
+	l1 := CreateLimit("1r/h,spam:3,block:2d")
+	assert.Equal(t, time.Hour, l1.Per)
+	assert.Equal(t, 1, l1.MaxRequests)
+	assert.Equal(t, 2*time.Hour*24, l1.Block)
+}
+
+func Test_Rate_Limits_DAY_OPTION(t *testing.T) {
+	l1 := CreateLimit("1r/d,spam:3,block:2d")
+	assert.Equal(t, time.Hour*24, l1.Per)
 	assert.Equal(t, 1, l1.MaxRequests)
 	assert.Equal(t, 2*time.Hour*24, l1.Block)
 }
@@ -84,8 +105,47 @@ func Test_It_Clear_The_Limit_EVERY_MINUTE(t *testing.T) {
 
 	assert.Equal(t, 3, l.Rates[k].Hits)
 
-	travelOneMinute := time.Now().Add(time.Minute)
-	patch := monkey.Patch(time.Now, func() time.Time { return travelOneMinute })
+	// Manipulate time to not having to wait so long...
+	travelToFuture := time.Now().Add(time.Minute)
+	patch := monkey.Patch(time.Now, func() time.Time { return travelToFuture })
+	defer patch.Unpatch()
+
+	time.Sleep(2 * time.Second)
+	l.Hit(k)
+	assert.Equal(t, 1, l.Rates[k].Hits)
+}
+
+func Test_It_Clear_The_Limit_EVERY_HOUR(t *testing.T) {
+	l := CreateLimit("5r/h")
+	k := "127.0.0.1"
+	l.Hit(k)
+	l.Hit(k)
+	l.Hit(k)
+
+	assert.Equal(t, 3, l.Rates[k].Hits)
+
+	// Manipulate time to not having to wait so long...
+	travelToFuture := time.Now().Add(time.Hour)
+	patch := monkey.Patch(time.Now, func() time.Time { return travelToFuture })
+	defer patch.Unpatch()
+
+	time.Sleep(2 * time.Second)
+	l.Hit(k)
+	assert.Equal(t, 1, l.Rates[k].Hits)
+}
+
+func Test_It_Clear_The_Limit_EVERY_DAY(t *testing.T) {
+	l := CreateLimit("5r/d")
+	k := "127.0.0.1"
+	l.Hit(k)
+	l.Hit(k)
+	l.Hit(k)
+
+	assert.Equal(t, 3, l.Rates[k].Hits)
+
+	// Manipulate time to not having to wait so long...
+	travelToFuture := time.Now().Add(time.Hour * 24)
+	patch := monkey.Patch(time.Now, func() time.Time { return travelToFuture })
 	defer patch.Unpatch()
 
 	time.Sleep(2 * time.Second)

@@ -27,13 +27,18 @@ func parse(s string) (Options, error) {
 	}
 
 	per := p[1]
-	if per != "s" && per != "m" {
-		return op, fmt.Errorf("Invalid limit [%s] Limit must be per s as second or m as minute", per)
-	}
-
-	perDuration := time.Second
-	if per == "m" {
+	var perDuration time.Duration
+	switch strings.ToLower(per) {
+	case "s":
+		perDuration = time.Second
+	case "m":
 		perDuration = time.Minute
+	case "h":
+		perDuration = time.Hour
+	case "d":
+		perDuration = time.Hour * 24
+	default:
+		return op, fmt.Errorf("Invalid limit [%s] Limit must be per s as second, m as minute, h as hour or d as day", per)
 	}
 
 	op.Max = maxValue
@@ -67,7 +72,7 @@ func parse(s string) (Options, error) {
 }
 
 func getDuration(max int, s string) time.Duration {
-	t := time.Second
+	var t time.Duration
 	switch s {
 	case "d":
 		t = time.Hour * 24

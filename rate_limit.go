@@ -15,14 +15,13 @@ type Limit struct {
 	Spammer     Spammer
 	Rates       map[string]*RateLimit
 }
+
 type RateLimit struct {
 	ExpiredAt time.Time
 	Hits      int
 }
 
-var (
-	Mutex sync.Mutex
-)
+var Mutex sync.Mutex
 
 func CreateLimit(key string) Limit {
 	op, err := parse(key)
