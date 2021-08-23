@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Limit struct {
@@ -37,7 +39,10 @@ func CreateLimit(key string) Limit {
 		MaxSpam:     op.MaxToSpam,
 		Rates:       limits,
 	}
-	RunLimitCleaner(&l)
+	err = RunLimitCleaner(&l)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if l.MaxSpam != 0 {
 		l.Spammer = CreateSpammer()
@@ -62,7 +67,8 @@ func (l *Limit) Hit(key string) error {
 		l.Rates[key] = createKey()
 		k = l.Rates[key]
 	}
-	if k.Hits >= l.MaxRequests {
+	hits := k.Hits
+	if hits >= l.MaxRequests {
 		if l.Spammer.Values != nil {
 			l.Spammer.Increase(key)
 		}
@@ -72,7 +78,8 @@ func (l *Limit) Hit(key string) error {
 			}
 		}
 		Mutex.Unlock()
-		return fmt.Errorf("The key [%s] has reached max requests [%d]", key, k.Hits)
+		log.Warnf("The key [%s] has reached max requests [%d]", key, hits)
+		return fmt.Errorf("The key [%s] has reached max requests [%d]", key, hits)
 	}
 	k.Hit()
 	Mutex.Unlock()
