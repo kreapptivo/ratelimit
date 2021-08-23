@@ -1,10 +1,10 @@
 package ratelimit
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/go-co-op/gocron"
-	log "github.com/sirupsen/logrus"
 )
 
 var s *gocron.Scheduler = gocron.NewScheduler(time.UTC)
@@ -21,11 +21,10 @@ func RunLimitCleaner(l *Limit) error {
 				r.Hits = 0
 			}
 			Mutex.Unlock()
-			log.Debugf("Run cleaner for key %s, hits %d", k, hits)
 		}
 	})
 	if err != nil {
-		log.Errorf("Error adding cleaning job: %s", err)
+		panic(fmt.Sprintf("Error adding cleaning job: %s", err))
 		return err
 	}
 	s.StartAsync()
