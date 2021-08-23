@@ -83,25 +83,34 @@ func Test_IT_RETURN_ERROR_AFTER_HIT_OVER_LIMIT(t *testing.T) {
 	}
 }
 
-func Test_It_Clear_The_Limit_EVERY_SECOND(t *testing.T) {
+func Test_The_Limit_EVERY_SECOND(t *testing.T) {
 	l := CreateLimit("1r/s")
 	k := "127.0.0.1"
 
-	l.Hit(k)
-	time.Sleep(2 * time.Second)
+	err := l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
 
-	l.Hit(k)
-	time.Sleep(2 * time.Second)
+	err = l.Hit(k)
+	assert.Equal(t, fmt.Errorf("The key [%s] has reached max requests [1]", k), err)
 
-	assert.Equal(t, 0, l.Rates[k].Hits)
+	// dropped 1 r/s
+	time.Sleep(1 * time.Second)
+
+	err = l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
+
+	assert.Equal(t, 1, l.Rates[k].Hits)
 }
 
 func Test_It_Clear_The_Limit_EVERY_MINUTE(t *testing.T) {
-	l := CreateLimit("5r/m")
+	l := CreateLimit("3r/m")
 	k := "127.0.0.1"
-	l.Hit(k)
-	l.Hit(k)
-	l.Hit(k)
+	err := l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
+	err = l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
+	err = l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
 
 	assert.Equal(t, 3, l.Rates[k].Hits)
 
@@ -111,17 +120,21 @@ func Test_It_Clear_The_Limit_EVERY_MINUTE(t *testing.T) {
 	defer patch.Unpatch()
 
 	time.Sleep(2 * time.Second)
-	l.Hit(k)
+	err = l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
 	assert.Equal(t, 1, l.Rates[k].Hits)
 }
 
 func Test_It_Clear_The_Limit_EVERY_HOUR(t *testing.T) {
-	l := CreateLimit("5r/h")
+	l := CreateLimit("3r/h")
 	k := "127.0.0.1"
-	l.Hit(k)
-	l.Hit(k)
-	l.Hit(k)
 
+	err := l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
+	err = l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
+	err = l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
 	assert.Equal(t, 3, l.Rates[k].Hits)
 
 	// Manipulate time to not having to wait so long...
@@ -130,16 +143,21 @@ func Test_It_Clear_The_Limit_EVERY_HOUR(t *testing.T) {
 	defer patch.Unpatch()
 
 	time.Sleep(2 * time.Second)
-	l.Hit(k)
+	err = l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
 	assert.Equal(t, 1, l.Rates[k].Hits)
 }
 
 func Test_It_Clear_The_Limit_EVERY_DAY(t *testing.T) {
-	l := CreateLimit("5r/d")
+	l := CreateLimit("3r/d")
 	k := "127.0.0.1"
-	l.Hit(k)
-	l.Hit(k)
-	l.Hit(k)
+	err := l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
+	err = l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
+	err = l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
+	assert.Equal(t, 3, l.Rates[k].Hits)
 
 	assert.Equal(t, 3, l.Rates[k].Hits)
 
@@ -149,6 +167,7 @@ func Test_It_Clear_The_Limit_EVERY_DAY(t *testing.T) {
 	defer patch.Unpatch()
 
 	time.Sleep(2 * time.Second)
-	l.Hit(k)
+	err = l.Hit(k)
+	assert.FailOnError(t, err, "Hit should be accepted")
 	assert.Equal(t, 1, l.Rates[k].Hits)
 }
