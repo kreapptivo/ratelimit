@@ -25,7 +25,7 @@ func Test_it_count_spam_as_expected(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func Test_it_clears_spam_after_expeced_duration(t *testing.T) {
+func Test_it_clears_spam_after_expected_duration(t *testing.T) {
 	l1 := CreateLimit("1r/s,spam:3,block:2d")
 	key := "127.0.0.1"
 	l1.Hit(key)
